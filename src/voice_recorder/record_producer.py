@@ -4,11 +4,12 @@ from typing import Any
 from numpy import ndarray, float64
 
 # OS
-from os import path
+from os import path, makedirs
 
 # Libs
 import sounddevice as sd
 from scipy.io.wavfile import write
+from manager import settings_manager
 
 
 #
@@ -34,7 +35,7 @@ class Generator(ABC):
     def __init__(self) -> None:
         super().__init__()
         self.base_dir: str
-        self.default_name: str
+        self.default_filename: str
 
     @abstractmethod
     def generate_unique_name(self, name: str, directory: str = None) -> str:
@@ -83,9 +84,9 @@ class Producer(ABC):
 class VoiceRecorder(Recorder):
     def __init__(self) -> None:
         super().__init__()
-        self.freq = 44100
-        self.duration = 5
-        self.channels = 2
+        self.freq = settings_manager.get_setting('recorder.freq')
+        self.duration = settings_manager.get_setting('recorder.duration')
+        self.channels = settings_manager.get_setting('recorder.channels')
 
     def record(self) -> (ndarray[float64] | Any):
         recording = sd.rec(
@@ -100,16 +101,37 @@ class VoiceRecorder(Recorder):
 class PathNameGenerator(Generator):
     def __init__(self) -> None:
         super().__init__()
-        self.base_dir = '/home/sergei/VoiceRecorder/src/voice_recorder/records'
-        self.default_name = 'test_default'
+        self.save_records_path = self.build_save_records_path()
+        self.default_filename = settings_manager.get_setting(
+            'recorder.default_filename')
 
-    def generate_unique_name(self, name: str, directory: str = None) -> str:
+    def build_save_records_path(self) -> str:
+        """Return a path to a directory where records will be saved"""
+
+        @staticmethod
+        def is_valid_dir(directory: str) -> None:
+            if not path.exists(directory):
+                makedirs(directory)
+
+        directory = settings_manager.get_setting('save_records_path')
+
+        if directory != "":
+            is_valid_dir(directory)
+            return directory
+
+        directory = path.join(
+            settings_manager.get_setting('base_dir'), 'records',)
+        is_valid_dir(directory)
+
+        return directory
+
+    def generate_unique_name(self, directory: str = None) -> str:
         if not directory:
-            directory = self.base_dir
+            directory = self.save_records_path
 
         count = 1
         while True:
-            file_name = f"{name}_{count}.wav"
+            file_name = f"{self.default_filename}_{count}.wav"
             full_path = path.join(directory, file_name)
             if not path.exists(full_path):
                 return full_path
@@ -139,11 +161,8 @@ class RecordProducer(Producer):
         self.path_name_generator = PathNameGenerator()
         self.record_writer = RecordWriter()
 
-    def produce_record(self, name: str = None) -> None:
-        if not name:
-            name = None
-
+    def produce_record(self) -> None:
         self.record_writer.write_record_scrip(
             self.voice_recorder.record(),
-            self.path_name_generator.generate_unique_name(name)
+            self.path_name_generator.generate_unique_name()
         )
