@@ -1,3 +1,16 @@
+# IDE / Edditor
+.idea
+idea
+idea/
+.idea/
+.vscode
+vscode
+vscode/
+.vscode/
+
+# Audio files
+*.wav
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

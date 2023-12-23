@@ -38,7 +38,7 @@ class Generator(ABC):
         self.default_filename: str
 
     @abstractmethod
-    def generate_unique_name(self, name: str, directory: str = None) -> str:
+    def generate_unique_name(self) -> str:
         """
         Generate a unique name for the record and construct a full path where the record
         will be saved. Should return a full path.
@@ -105,13 +105,13 @@ class PathNameGenerator(Generator):
         self.default_filename = settings_manager.get_setting(
             'recorder.default_filename')
 
-    def build_save_records_path(self) -> str:
+    @staticmethod
+    def build_save_records_path() -> str:
         """Return a path to a directory where records will be saved"""
 
-        @staticmethod
-        def is_valid_dir(directory: str) -> None:
-            if not path.exists(directory):
-                makedirs(directory)
+        def is_valid_dir(records_directory: str) -> None:
+            if not path.exists(records_directory):
+                makedirs(records_directory)
 
         directory = settings_manager.get_setting('save_records_path')
 
@@ -125,9 +125,8 @@ class PathNameGenerator(Generator):
 
         return directory
 
-    def generate_unique_name(self, directory: str = None) -> str:
-        if not directory:
-            directory = self.save_records_path
+    def generate_unique_name(self) -> str:
+        directory = self.save_records_path
 
         count = 1
         while True:
@@ -151,7 +150,7 @@ class RecordWriter(Writer):
         write(full_path, freq, recording)
 
     def write_record_wavio(self, record: tuple[int, ndarray], full_path: str) -> None:
-        ...
+        raise NotImplemented
 
 
 class RecordProducer(Producer):

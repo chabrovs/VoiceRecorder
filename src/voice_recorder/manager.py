@@ -14,7 +14,7 @@ SETTINGS = path.join(BASEDIR, "settings.json", )
 class Manager(ABC):
     def __init__(self) -> None:
         super().__init__()
-        self.__settings: dict = None
+        self.__settings: dict
 
     @abstractmethod
     def get_setting(self, setting: str) -> Any:
@@ -37,11 +37,12 @@ class SettingsManager(Manager):
         super().__init__()
         self.__settings = self.load_settings()
 
-    def add_base_dir(self, settings_data: dict) -> None:
+    @staticmethod
+    def add_base_dir(settings_data: dict) -> None:
         """Adding base directory to the settings"""
         settings_data['base_dir'] = BASEDIR.__str__()
 
-    def load_settings(self) -> None:
+    def load_settings(self) -> dict:
         settings = SETTINGS
         with open(settings, 'r') as file:
             settings_data = json.load(file)
@@ -63,7 +64,4 @@ class SettingsManager(Manager):
                 f'The setting was not found by this address "{setting}"')
 
 
-if __name__ == '__main__':
-    pass
-else:
-    settings_manager = SettingsManager()
+settings_manager = SettingsManager()
