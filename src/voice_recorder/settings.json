@@ -1,0 +1,11 @@
+{
+    "base_dir": "Will be set after the application execution",
+    "save_records_path": "",
+    "recorder": {
+        "freq": 44100,
+        "duration": 5,
+        "channels": 2,
+        "default_filename": "Record"
+    },
+    "GUI": {}
+}
