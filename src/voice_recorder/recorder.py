@@ -12,4 +12,4 @@ class Main:
 
 def main():
     main = Main()
-    main.record()
+    # main.record()
