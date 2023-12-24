@@ -1,5 +1,6 @@
 import sys
-from recorder import main
+from GUI import main
+
 
 if __name__ == '__main__':
     sys.exit(main())
