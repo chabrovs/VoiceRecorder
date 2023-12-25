@@ -15,6 +15,8 @@ from manager import settings_manager
 
 class VoiceRecorderApp:
     def __init__(self, master):
+        self.recording_thread = None
+        self.selected_item = None
         self.master = master
         self.master.title("Voice Recorder App")
         self.master.geometry('450x500')
@@ -61,6 +63,19 @@ class VoiceRecorderApp:
         self.records_listbox.pack(
             side=tk.LEFT, padx=5, fill=tk.BOTH, expand=True)
 
+        # Listbox right mouse click menu config
+        self.right_click_menu = tk.Menu(self.records_frame, tearoff=0)
+        self.right_click_menu.add_command(label="Rename", command=self.rename_record)
+        self.right_click_menu.add_command(label="Delete", command=self.confirm_delete)
+
+        # Bin buttons
+        self.records_listbox.bind("<Button-3>", self.show_context_menu)
+        # Bind left mouse click on the root window to close the menu
+        self.master.bind("<Button-1>", self.close_context_menu)
+
+        # Bind menu to the FocusOut event to close when it loses focus
+        self.right_click_menu.bind("<FocusOut>", self.close_context_menu)
+
         # Scrollbar for the Listbox
         scrollbar = tk.Scrollbar(
             self.records_frame, orient=tk.VERTICAL, command=self.records_listbox.yview)
@@ -99,7 +114,8 @@ class VoiceRecorderApp:
             # Stop recording (you need to implement this method in your Recorder class)
             self.recorder.stop_recording()
 
-    def show_settings(self):
+    @staticmethod
+    def show_settings():
         operating_system = system().lower()
         settings_path = os.path.join(settings_manager.get_setting('base_dir'), 'settings.json', )
 
@@ -112,56 +128,31 @@ class VoiceRecorderApp:
                 subprocess.run(["open", "-t", settings_path])
             case _:
                 raise Exception(f"Operating system '{operating_system}' is not supported")
-    
+
     def list_records(self):
         # TODO: make rows deletion work correctly.
         # Can replace this with your own directory
         # directory = filedialog.askdirectory(title="Select Directory")
         directory = settings_manager.get_setting('save_records_path')
         if directory:
-            # self.records_listbox.delete(0, tk.END)
-            print(self.records_listbox.children)
-            rows = self.records_listbox.children
-            if rows != {}:
-                for c in rows.values():
-                    c.destroy()
-
+            self.records_listbox.delete(0, tk.END)
             records = [file for file in os.listdir(
                 directory) if file.endswith(('.wav', '.mp3', '.ogg'))]
             if records:
-                if rows != {}:
-                    for c in rows.values():
-                        c.destroy()
-                # self.records_listbox.delete(
-                #     0, tk.END)  # Clear the current list
+                self.records_listbox.delete(
+                    0, tk.END)  # Clear the current list
                 for record in records:
-                    # Create a frame for each row
-                    record_frame = tk.Frame(self.records_listbox)
-                    record_frame.pack(fill=tk.X)
-
-                    # Label for the record name
-                    record_label = tk.Label(
-                        record_frame, text=record, width=30, anchor='w')
-                    record_label.pack(side=tk.LEFT)
-
-                    # Rename button for each record
-                    rename_button = tk.Button(
-                        record_frame, text="Rename", command=lambda file=record: self.rename_record(file))
-                    rename_button.pack(side=tk.LEFT, padx=5)
-
-                    # Delete button for each record
-                    delete_button = tk.Button(
-                        record_frame, text="Delete", command=lambda file=record: self.confirm_delete(file))
-                    delete_button.pack(side=tk.RIGHT)
-
                     # Insert the frame into the listbox
-                    self.records_listbox.insert(tk.END, record_frame)
+                    self.records_listbox.insert(tk.END, record)
             else:
                 self.records_listbox.delete(0, tk.END)
                 self.records_listbox.insert(
                     tk.END, "No audio records found in the selected directory.")
 
-    def confirm_delete(self, file):
+    def confirm_delete(self, file=None):
+        if self.selected_item:
+            file = self.selected_item
+
         confirm_dialog = messagebox.askquestion(
             "Confirm Delete", f"Are you sure you want to delete {file}?", icon='warning')
         if confirm_dialog == 'yes':
@@ -170,7 +161,10 @@ class VoiceRecorderApp:
             # Update the listbox after deletion
             self.list_records()
 
-    def rename_record(self, file):
+    def rename_record(self, file=None):
+        if self.selected_item:
+            file = self.selected_item
+
         new_name = simpledialog.askstring(
             "Rename Record", f"Enter new name for {file}:", parent=self.master)
         if new_name:
@@ -182,6 +176,16 @@ class VoiceRecorderApp:
             )
             # Update the listbox after renaming
             self.list_records()
+
+    #   Right mouse click menu
+    # Create a context menu
+    def show_context_menu(self, event):
+        selected_item = self.records_listbox.get(self.records_listbox.nearest(event.y))
+        self.selected_item = selected_item
+        self.right_click_menu.post(event.x_root, event.y_root)
+
+    def close_context_menu(self):
+        self.right_click_menu.unpost()
 
 
 if __name__ == "__main__":
