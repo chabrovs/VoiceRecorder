@@ -23,7 +23,7 @@ class Recorder(ABC):
         self.channels: int
 
     @abstractmethod
-    def record(self) -> (int, ndarray[float64] | Any):
+    def record(self) -> tuple[int, ndarray[float64] | Any]:
         """
         Record voce from a sound device with a certain frequency 
         for the certain duration.
@@ -34,7 +34,7 @@ class Recorder(ABC):
 class Generator(ABC):
     def __init__(self) -> None:
         super().__init__()
-        self.base_dir: str
+        self.save_records_path: str
         self.default_filename: str
 
     @abstractmethod
@@ -88,7 +88,7 @@ class VoiceRecorder(Recorder):
         self.duration = settings_manager.get_setting('recorder.duration')
         self.channels = settings_manager.get_setting('recorder.channels')
 
-    def record(self) -> (ndarray[float64] | Any):
+    def record(self) -> tuple[int, ndarray[float64] | Any]:
         recording = sd.rec(
             int(self.freq * self.duration),
             samplerate=self.freq,
@@ -101,29 +101,10 @@ class VoiceRecorder(Recorder):
 class PathNameGenerator(Generator):
     def __init__(self) -> None:
         super().__init__()
-        self.save_records_path = self.build_save_records_path()
+        self.save_records_path = settings_manager.get_setting(
+            'save_records_path')
         self.default_filename = settings_manager.get_setting(
             'recorder.default_filename')
-
-    @staticmethod
-    def build_save_records_path() -> str:
-        """Return a path to a directory where records will be saved"""
-
-        def is_valid_dir(records_directory: str) -> None:
-            if not path.exists(records_directory):
-                makedirs(records_directory)
-
-        directory = settings_manager.get_setting('save_records_path')
-
-        if directory != "":
-            is_valid_dir(directory)
-            return directory
-
-        directory = path.join(
-            settings_manager.get_setting('base_dir'), 'records',)
-        is_valid_dir(directory)
-
-        return directory
 
     def generate_unique_name(self) -> str:
         directory = self.save_records_path

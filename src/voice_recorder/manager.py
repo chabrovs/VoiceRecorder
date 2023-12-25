@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
-from os import path
+from os import path, makedirs
 from pathlib import Path
 import json
 
@@ -42,12 +42,32 @@ class SettingsManager(Manager):
         """Adding base directory to the settings"""
         settings_data['base_dir'] = BASEDIR.__str__()
 
+    @staticmethod
+    def build_save_records_path(settings_data: dict) -> None:
+        """Return a path to a directory where records will be saved"""
+
+        def is_valid_dir(records_directory: str) -> None:
+            if not path.exists(records_directory):
+                makedirs(records_directory)
+
+        directory = settings_data.get('save_records_path')
+
+        if directory != "":
+            is_valid_dir(directory)
+            settings_data['save_records_path'] = directory
+
+        directory = path.join(BASEDIR, 'records',)
+        is_valid_dir(directory)
+
+        settings_data['save_records_path'] = directory
+
     def load_settings(self) -> dict:
         settings = SETTINGS
         with open(settings, 'r') as file:
             settings_data = json.load(file)
 
         self.add_base_dir(settings_data)
+        self.build_save_records_path(settings_data)
 
         return settings_data
 
