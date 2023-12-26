@@ -19,7 +19,7 @@ class VoiceRecorderApp:
         self.selected_item = None
         self.master = master
         self.master.title("Voice Recorder App")
-        self.master.geometry('450x500')
+        self.master.geometry('250x500')
 
         self.recorder = Recorder()
         self.is_recording = False
@@ -65,8 +65,10 @@ class VoiceRecorderApp:
 
         # Listbox right mouse click menu config
         self.right_click_menu = tk.Menu(self.records_frame, tearoff=0)
-        self.right_click_menu.add_command(label="Rename", command=self.rename_record)
-        self.right_click_menu.add_command(label="Delete", command=self.confirm_delete)
+        self.right_click_menu.add_command(
+            label="Rename", command=self.rename_record)
+        self.right_click_menu.add_command(
+            label="Delete", command=self.confirm_delete)
 
         # Bin buttons
         self.records_listbox.bind("<Button-3>", self.show_context_menu)
@@ -98,12 +100,13 @@ class VoiceRecorderApp:
                 bg="green")  # Change color to green when recording starts
 
             # Start recording in a separate thread
-            self.recording_thread = Thread(
-                target=self.recorder.record)
-            self.recording_thread.start()
+            # self.recording_thread = Thread(
+            #     target=self.recorder.record)
+            # self.recording_thread.start()
+
+            self.recorder.start_recording()
 
     def stop_recording(self):
-        # TODO: Make it function
         if self.is_recording:
             self.is_recording = False
             self.start_button.config(state=tk.NORMAL)
@@ -117,7 +120,8 @@ class VoiceRecorderApp:
     @staticmethod
     def show_settings():
         operating_system = system().lower()
-        settings_path = os.path.join(settings_manager.get_setting('base_dir'), 'settings.json', )
+        settings_path = os.path.join(
+            settings_manager.get_setting('base_dir'), 'settings.json', )
 
         match operating_system:
             case 'windows':
@@ -127,10 +131,11 @@ class VoiceRecorderApp:
             case 'darwin':
                 subprocess.run(["open", "-t", settings_path])
             case _:
-                raise Exception(f"Operating system '{operating_system}' is not supported")
+                raise Exception(
+                    f"Operating system '{operating_system}' is not supported")
 
     def list_records(self):
-        # TODO: make rows deletion work correctly.
+        # TODO: sorting.
         # Can replace this with your own directory
         # directory = filedialog.askdirectory(title="Select Directory")
         directory = settings_manager.get_setting('save_records_path')
@@ -177,14 +182,15 @@ class VoiceRecorderApp:
             # Update the listbox after renaming
             self.list_records()
 
-    #   Right mouse click menu
+    # Right mouse click menu
     # Create a context menu
     def show_context_menu(self, event):
-        selected_item = self.records_listbox.get(self.records_listbox.nearest(event.y))
+        selected_item = self.records_listbox.get(
+            self.records_listbox.nearest(event.y))
         self.selected_item = selected_item
         self.right_click_menu.post(event.x_root, event.y_root)
 
-    def close_context_menu(self):
+    def close_context_menu(self, event=None):
         self.right_click_menu.unpost()
 
 

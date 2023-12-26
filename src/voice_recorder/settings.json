@@ -5,7 +5,11 @@
         "freq": 44100,
         "duration": 5,
         "channels": 2,
+        "frames_per_buffer": 1024,
         "default_filename": "Record"
     },
-    "GUI": {}
+    "GUI": {
+        "icon": "",
+        "record_after_program_terminated": false
+    }
 }
