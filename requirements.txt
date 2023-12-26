@@ -1,5 +1,13 @@
+# Recording.
 sounddevice
+pyaudio
+
+# Saving bytestring into an audio file.
 wavio
+wave
 scipy
 numpy
+
+# For IDE
 autopep8
+
