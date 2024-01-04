@@ -6,6 +6,7 @@ from numpy import ndarray, float64
 
 # OS
 from os import path, makedirs
+import queue
 from threading import Thread, Event
 
 # Libs
@@ -137,15 +138,34 @@ class RecordWriter(Writer):
     def write_record_wavio(self, record: tuple[int, ndarray], full_path: str) -> None:
         raise NotImplemented
 
+    def write_continues_record_wave(self, record: tuple[pyaudio.PyAudio, list[bytes]], full_path: str) -> None:
+        audio, frames = record
+        # Open audio file
+        audio_file = wave.open(full_path, 'wb')
+
+        # Set setting to the audio file
+        audio_file.setnchannels(settings_manager.get_setting('recorder.channels'))
+        audio_file.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
+        audio_file.setframerate(settings_manager.get_setting('recorder.freq'))
+
+        # Write data to the audio file
+        audio_file.writeframes(b''.join(frames))
+
+        # Close the audio file
+        audio_file.close()
+
 
 class ContinuesRecording(Thread):
     # TODO: Refactor the implementation so it would be more OOP designed.
 
     def __init__(self, group: None = None, target: Callable[..., object] | None = None, name: str | None = None, args: Iterable[Any] = ..., kwargs: Mapping[str, Any] | None = None, *, daemon: bool | None = None) -> None:
         super().__init__(group, target, name, args, kwargs, daemon=daemon)
+        self._target = target
         self._stop_recording = Event()
         self.daemon = True
+        # self._result_queue = queue.Queue()
         self.full_name_generator = PathNameGenerator()
+        self.record_writer = RecordWriter()
 
     def run(self):
         # Start recording
@@ -169,14 +189,9 @@ class ContinuesRecording(Thread):
         audio.terminate()
 
         # Save audio record
-        audio_file = wave.open(
-            self.full_name_generator.generate_unique_name(), 'wb')
-        audio_file.setnchannels(
-            settings_manager.get_setting('recorder.channels'))
-        audio_file.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
-        audio_file.setframerate(settings_manager.get_setting('recorder.freq'))
-        audio_file.writeframes(b''.join(frames))
-        audio_file.close()
+        self.record_writer.write_continues_record_wave(
+            (audio, frames), self.full_name_generator.generate_unique_name()
+        )
 
     def stop(self):
         self._stop_recording.set()
