@@ -20,6 +20,8 @@ class VoiceRecorderApp:
         self.master = master
         self.master.title("Voice Recorder App")
         self.master.geometry('250x500')
+        self.icon_image = tk.PhotoImage(file=settings_manager.get_setting('GUI.icon_path'))
+        self.master.wm_iconphoto(True, self.icon_image)
 
         self.recorder = Recorder()
         self.is_recording = False
@@ -201,5 +203,7 @@ if __name__ == "__main__":
 else:
     def main():
         root = tk.Tk()
+        # icon_image = tk.PhotoImage(file=settings_manager.get_setting('GUI.icon_path'))
+        # root.wm_iconphoto(True, icon_image)
         app = VoiceRecorderApp(root)
         root.mainloop()
