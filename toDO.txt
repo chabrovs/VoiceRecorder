@@ -1,0 +1,10 @@
+04-01-24
+
+To do it 0-0-5 version:
+1. Make icon path dinamic.
+2. Redesign Continues record class. (add more OOP approach).
+3. Make list of records update after the "Stop Recording" button is hit.
+4. Add sorting option for the list of records.
+ 
+Changes:
+The recorder interface has Singleton pattern implemented.

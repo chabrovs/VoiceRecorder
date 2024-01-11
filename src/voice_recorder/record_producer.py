@@ -136,7 +136,7 @@ class RecordWriter(Writer):
         write(full_path, freq, recording)
 
     def write_record_wavio(self, record: tuple[int, ndarray], full_path: str) -> None:
-        raise NotImplemented
+        raise NotImplementedError
 
     def write_continues_record_wave(self, record: tuple[pyaudio.PyAudio, list[bytes]], full_path: str) -> None:
         audio, frames = record

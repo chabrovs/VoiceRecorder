@@ -24,6 +24,10 @@ class VoiceRecorderApp:
         self.master.wm_iconphoto(True, self.icon_image)
 
         self.recorder = Recorder()
+        
+        self.recorder2 = Recorder()
+        print(self.recorder is self.recorder2)
+        
         self.is_recording = False
 
         # GUI Elements
