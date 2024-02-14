@@ -1,7 +1,8 @@
+# Annotation 
 from abc import ABC, abstractmethod
 from typing import Any
 
-
+# OS
 from os import path, makedirs
 from pathlib import Path
 import json
@@ -36,6 +37,7 @@ class SettingsManager(Manager):
     def __init__(self) -> None:
         super().__init__()
         self.__settings = self.load_settings()
+        self.build_icon_path()
 
     @staticmethod
     def add_base_dir(settings_data: dict) -> None:
@@ -43,7 +45,7 @@ class SettingsManager(Manager):
         settings_data['base_dir'] = BASEDIR.__str__()
 
     @staticmethod
-    def build_save_records_path(settings_data: dict) -> None:
+    def build_save_records_path(settings_data: dict) -> int:
         """Return a path to a directory where records will be saved"""
 
         def is_valid_dir(records_directory: str) -> None:
@@ -60,6 +62,24 @@ class SettingsManager(Manager):
         is_valid_dir(directory)
 
         settings_data['save_records_path'] = directory
+
+        return 0
+    
+    def build_icon_path(self) -> int:
+        """Builds full icon path"""
+        
+        def does_file_exist(directory: str) -> bool:
+            return Path(directory).exists()
+        
+        icon_path = path.join(BASEDIR, self.get_setting('GUI.icon_path')) 
+
+        if not does_file_exist(icon_path):
+            raise LookupError(f"ERROR: 'manager, settings manager, build icon path' \nICON file does not exist in the directory '{icon_path}'")
+
+        self.__settings['GUI']['icon_path'] = icon_path
+
+        return 0
+
 
     def load_settings(self) -> dict:
         settings = SETTINGS

@@ -97,6 +97,14 @@ class VoiceRecorderApp:
             self.master, text="List Records", command=self.list_records)
         self.list_records_button.pack(pady=10)
 
+        # Sort records button
+        self.list_records_button = tk.Button(
+            self.master, text="Sort Records", command=self.sort_records)
+        self.list_records_button.pack(pady=5)
+
+        # Init methods:
+        self.list_records()
+
     def start_recording(self):
         if not self.is_recording:
             self.is_recording = True
@@ -122,6 +130,7 @@ class VoiceRecorderApp:
 
             # Stop recording (you need to implement this method in your Recorder class)
             self.recorder.stop_recording()
+            self.list_records()
 
     @staticmethod
     def show_settings():
@@ -159,6 +168,16 @@ class VoiceRecorderApp:
                 self.records_listbox.delete(0, tk.END)
                 self.records_listbox.insert(
                     tk.END, "No audio records found in the selected directory.")
+    
+    def sort_records(self) -> int:
+        data = list(self.records_listbox.get(0, "end"))
+        data.sort()
+        self.records_listbox.delete(0, "end")
+
+        for record in data:
+            self.records_listbox.insert(tk.END, record)
+
+        return 0
 
     def confirm_delete(self, file=None):
         if self.selected_item:
