@@ -9,7 +9,7 @@
         "default_filename": "Record"
     },
     "GUI": {
-        "icon_path": "/home/sergei/VoiceRecorder/src/voice_recorder/static/images/icon.png",
+        "icon_path": "static/images/icon.png",
         "record_after_program_terminated": false
     }
 }

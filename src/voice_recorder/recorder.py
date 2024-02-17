@@ -4,8 +4,16 @@ from record_producer import RecordProducer
 
 
 class Recorder:
-    def __init__(self) -> None:
-        self.record_producer = RecordProducer()
+    _instance = None
+
+    def __new__(cls):
+        if not cls._instance:
+            cls._instance = super(Recorder, cls).__new__(cls)
+            # Class initialization here:
+            cls.record_producer = RecordProducer()
+
+        return cls._instance
+
 
     def record(self) -> None:
         self.record_producer.produce_record()
