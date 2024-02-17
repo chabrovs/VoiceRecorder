@@ -10,27 +10,33 @@ from tkinter import filedialog, messagebox, simpledialog
 
 # Application
 from recorder import Recorder
-from manager import settings_manager
+from manager import SettingsManager
+
+# GLOBAL VARIABLES
+settings_manager = SettingsManager()
 
 
 class VoiceRecorderApp:
+    """
+    This class is responsible only for GUI interface of the application.
+    """
     def __init__(self, master):
         self.recording_thread = None
         self.selected_item = None
         self.master = master
         self.master.title("Voice Recorder App")
         self.master.geometry('250x500')
-        self.icon_image = tk.PhotoImage(file=settings_manager.get_setting('GUI.icon_path'))
+        self.icon_image = tk.PhotoImage(
+            file=settings_manager.get_setting('GUI.icon_path'))
         self.master.wm_iconphoto(True, self.icon_image)
 
+        # Essentials
         self.recorder = Recorder()
-        
-        self.recorder2 = Recorder()
-        print(self.recorder is self.recorder2)
-        
         self.is_recording = False
 
         # GUI Elements
+
+        # Top buttons
         self.start_button = tk.Button(
             self.master, text="Start Recording", command=self.start_recording)
         self.start_button.pack(pady=10)
@@ -92,15 +98,21 @@ class VoiceRecorderApp:
         # Configure Listbox to use the scrollbar
         self.records_listbox.config(yscrollcommand=scrollbar.set)
 
+        # Frames for lower buttons
+        self.records_controller = tk.Frame(master)
+        self.records_controller.pack(pady=10)
+
         # List records button
         self.list_records_button = tk.Button(
-            self.master, text="List Records", command=self.list_records)
-        self.list_records_button.pack(pady=10)
+            self.records_controller, text="List Records", command=self.list_records)
+        # self.list_records_button.pack(pady=10)
+        self.list_records_button.grid(row=0, column=0, padx=5, pady=10)
 
         # Sort records button
-        self.list_records_button = tk.Button(
-            self.master, text="Sort Records", command=self.sort_records)
-        self.list_records_button.pack(pady=5)
+        self.sort_records_button = tk.Button(
+            self.records_controller, text="⇵", command=self.sort_records)
+        # self.list_records_button.pack(pady=5)
+        self.sort_records_button.grid(row=0, column=1, padx=5, pady=5)
 
         # Init methods:
         self.list_records()
@@ -168,7 +180,7 @@ class VoiceRecorderApp:
                 self.records_listbox.delete(0, tk.END)
                 self.records_listbox.insert(
                     tk.END, "No audio records found in the selected directory.")
-    
+
     def sort_records(self) -> int:
         data = list(self.records_listbox.get(0, "end"))
         data.sort()

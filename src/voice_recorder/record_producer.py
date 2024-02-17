@@ -14,12 +14,15 @@ import sounddevice as sd
 from scipy.io.wavfile import write
 import wave
 import pyaudio
-from manager import settings_manager
+from manager import SettingsManager
+
+# GLOBAL VARIABLES
+settings_manager = SettingsManager()
 
 
-#
+# ///
 # ABSTRACT DESIGN / DOCUMENTATION
-#
+# ///
 class Recorder(ABC):
     def __init__(self) -> None:
         super().__init__()
@@ -82,9 +85,9 @@ class Producer(ABC):
         ...
 
 
-#
+# ///
 # IMPLEMENTATION
-#
+# ///
 
 class VoiceRecorder(Recorder):
     def __init__(self) -> None:
@@ -144,7 +147,8 @@ class RecordWriter(Writer):
         audio_file = wave.open(full_path, 'wb')
 
         # Set setting to the audio file
-        audio_file.setnchannels(settings_manager.get_setting('recorder.channels'))
+        audio_file.setnchannels(
+            settings_manager.get_setting('recorder.channels'))
         audio_file.setsampwidth(audio.get_sample_size(pyaudio.paInt16))
         audio_file.setframerate(settings_manager.get_setting('recorder.freq'))
 
